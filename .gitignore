@@ -42,3 +42,6 @@ data/
 
 # Go files after sed
 *.go-e
+
+# Local modules
+go-data-structures

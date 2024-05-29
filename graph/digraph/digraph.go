@@ -1,12 +1,16 @@
-package graph
+package digraph
 
-import "goraph/collection/set"
+import (
+	"goraph/graph"
+
+	"github.com/nikolai-kramskoy/go-data-structures/set"
+)
 
 // Digraph interface represents an immutable digraph.
 //
 // This interface is designed to be extended so one may
 // implement simple digraphs, multidigraphs etc.
-type Digraph[V Vertex] interface {
+type Digraph[V graph.Vertex] interface {
 	// Vertices returns a set.Set of all vertices in this Digraph.
 	//
 	// No operation on the returned set.Set may affect the state of this Digraph.
@@ -15,7 +19,7 @@ type Digraph[V Vertex] interface {
 	// Edges returns a set.Set of all edges in this Digraph.
 	//
 	// No operation on the returned set.Set may affect the state of this Digraph.
-	Edges() set.Set[Edge[V]]
+	Edges() set.Set[graph.Edge[V]]
 
 	// Successors returns a set.Set of all vertices for which exists
 	// at least one edge with vertex source and some Vertex target in this set.Set.

@@ -1,4 +1,4 @@
-package max_flow_algorithm
+package maxflow
 
 import "goraph/graph"
 

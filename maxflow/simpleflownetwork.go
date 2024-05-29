@@ -1,10 +1,13 @@
-package max_flow_algorithm
+package maxflow
 
-import "goraph/graph"
+import (
+	"goraph/graph"
+	"goraph/graph/digraph/simpledigraph"
+)
 
 // SimpleFlowNetwork https://en.wikipedia.org/wiki/Flow_network
 type SimpleFlowNetwork[V graph.Vertex] struct {
-	graph.SimpleDigraph[V]
+	simpledigraph.SimpleDigraph[V]
 
 	// S vertex must be present in graph.SimpleDigraph.
 	S V

@@ -1,4 +1,4 @@
-package edmonds_karp_algorithm
+package edmondskarp
 
 import "goraph/graph"
 

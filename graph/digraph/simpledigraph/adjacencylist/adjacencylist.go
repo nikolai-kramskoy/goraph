@@ -1,10 +1,13 @@
-package adjacency_list_digraph
+package adjacencylist
 
 import (
 	"errors"
 	"fmt"
-	"goraph/collection/set"
 	"goraph/graph"
+	"goraph/graph/digraph/simpledigraph"
+
+	"github.com/nikolai-kramskoy/go-data-structures/set"
+	"github.com/nikolai-kramskoy/go-data-structures/set/mapset"
 )
 
 type adjacencyListSimpleDigraph[V graph.Vertex] struct {
@@ -12,7 +15,7 @@ type adjacencyListSimpleDigraph[V graph.Vertex] struct {
 	predecessors map[V]set.Set[V]
 }
 
-var _ graph.SimpleDigraph[struct{}] = (*adjacencyListSimpleDigraph[struct{}])(nil)
+var _ simpledigraph.SimpleDigraph[struct{}] = (*adjacencyListSimpleDigraph[struct{}])(nil)
 
 // NewAdjacencyListSimpleDigraph creates an immutable graph.SimpleDigraph
 // implementation using adjacency list ADT.
@@ -23,7 +26,7 @@ var _ graph.SimpleDigraph[struct{}] = (*adjacencyListSimpleDigraph[struct{}])(ni
 func NewAdjacencyListSimpleDigraph[V graph.Vertex](
 	vertices set.Set[V],
 	edges set.Set[graph.Edge[V]],
-) (graph.SimpleDigraph[V], error) {
+) (simpledigraph.SimpleDigraph[V], error) {
 	if vertices == nil {
 		return nil, errors.New("vertices == nil")
 	}
@@ -35,8 +38,8 @@ func NewAdjacencyListSimpleDigraph[V graph.Vertex](
 	predecessors := make(map[V]set.Set[V], vertices.Size())
 
 	for _, vertex := range vertices.Elements() {
-		successors[vertex] = set.NewEmptyMapSet[V]()
-		predecessors[vertex] = set.NewEmptyMapSet[V]()
+		successors[vertex] = mapset.New[V]()
+		predecessors[vertex] = mapset.New[V]()
 	}
 
 	for _, edge := range edges.Elements() {
@@ -77,7 +80,7 @@ func (digraph *adjacencyListSimpleDigraph[V]) Vertices() set.Set[V] {
 		i++
 	}
 
-	return set.NewMapSetFromSlice(vertices)
+	return mapset.NewFromElements(vertices...)
 }
 
 func (digraph *adjacencyListSimpleDigraph[V]) Edges() set.Set[graph.Edge[V]] {
@@ -89,11 +92,11 @@ func (digraph *adjacencyListSimpleDigraph[V]) Edges() set.Set[graph.Edge[V]] {
 		}
 	}
 
-	return set.NewMapSetFromSlice(edges)
+	return mapset.NewFromElements(edges...)
 }
 
 func (digraph *adjacencyListSimpleDigraph[V]) Successors(vertex V) set.Set[V] {
-	successors := set.NewEmptyMapSet[V]()
+	successors := mapset.New[V]()
 
 	if _, isPresent := digraph.successors[vertex]; !isPresent {
 		return successors
@@ -107,7 +110,7 @@ func (digraph *adjacencyListSimpleDigraph[V]) Successors(vertex V) set.Set[V] {
 }
 
 func (digraph *adjacencyListSimpleDigraph[V]) Predecessors(vertex V) set.Set[V] {
-	predecessors := set.NewEmptyMapSet[V]()
+	predecessors := mapset.New[V]()
 
 	if _, isPresent := digraph.predecessors[vertex]; !isPresent {
 		return predecessors

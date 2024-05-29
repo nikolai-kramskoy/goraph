@@ -1,37 +1,34 @@
-package edmonds_karp_algorithm
+package edmondskarp
 
 import (
-	"goraph/collection/queue"
-	"goraph/collection/set"
 	"goraph/graph"
-	// TODO are those import aliases okay?
-	ald "goraph/graph/adjacency_list_digraph"
-	mfa "goraph/max_flow_algorithm"
+	"goraph/graph/digraph/simpledigraph"
+	al "goraph/graph/digraph/simpledigraph/adjacencylist"
+	mf "goraph/maxflow"
 	"math"
+
+	"github.com/nikolai-kramskoy/go-data-structures/queue/slicequeue"
+	"github.com/nikolai-kramskoy/go-data-structures/set"
+	"github.com/nikolai-kramskoy/go-data-structures/set/mapset"
 )
 
-type edmondsKarpAlgorithm[V graph.Vertex] struct{}
+type edmondsKarp[V graph.Vertex] struct{}
 
-var _ mfa.MaxFlowAlgorithm[struct{}] = (*edmondsKarpAlgorithm[struct{}])(nil)
+var _ mf.MaxFlow[struct{}] = (*edmondsKarp[struct{}])(nil)
 
-// NewEdmondsKarpAlgorithm creates an Edmonds-Karp algorithm
+// NewEdmondsKarp creates an Edmonds-Karp algorithm
 // implementation of max_flow_algorithm.MaxFlowAlgorithm.
 //
 // This implementation is immutable and thread-safe.
 //
-// It is a variation of Edmonds-Karp algorithm as defined in book
-// "Комбинаторные задачи на графах: учебное пособие
-// / В. П. Ильев - Омск: Изд-во Ом. Гос. ун-та, 2013. 80 с."
-// ISBN 978-7779-1668-6
-//
 // https://en.wikipedia.org/wiki/Edmonds-Karp_algorithm
-func NewEdmondsKarpAlgorithm[V graph.Vertex]() mfa.MaxFlowAlgorithm[V] {
-	return edmondsKarpAlgorithm[V]{}
+func NewEdmondsKarp[V graph.Vertex]() mf.MaxFlow[V] {
+	return edmondsKarp[V]{}
 }
 
-func (algorithm edmondsKarpAlgorithm[V]) ComputeMaxFlow(
-	network *mfa.SimpleFlowNetwork[V],
-) (mfa.Flow[V], error) {
+func (algorithm edmondsKarp[V]) Compute(
+	network *mf.SimpleFlowNetwork[V],
+) (mf.Flow[V], error) {
 	assertPreconditions(network)
 
 	vertices := network.Vertices()
@@ -40,7 +37,7 @@ func (algorithm edmondsKarpAlgorithm[V]) ComputeMaxFlow(
 	// first iteration setup
 
 	residualNetworkEdges, residualNetworkCapacity := residualSimpleFlowNetwork(network, currentFlow)
-	residualDigraph, _ := ald.NewAdjacencyListSimpleDigraph(vertices, residualNetworkEdges)
+	residualDigraph, _ := al.NewAdjacencyListSimpleDigraph(vertices, residualNetworkEdges)
 	vertexToPredecessor := breadthFirstSearch(residualDigraph, network.S, network.T)
 	_, tPredecessorIsPresent := vertexToPredecessor[network.T]
 
@@ -90,7 +87,7 @@ func (algorithm edmondsKarpAlgorithm[V]) ComputeMaxFlow(
 		// setup next iteration
 
 		residualNetworkEdges, residualNetworkCapacity = residualSimpleFlowNetwork(network, currentFlow)
-		residualDigraph, _ = ald.NewAdjacencyListSimpleDigraph(vertices, residualNetworkEdges)
+		residualDigraph, _ = al.NewAdjacencyListSimpleDigraph(vertices, residualNetworkEdges)
 		vertexToPredecessor = breadthFirstSearch(residualDigraph, network.S, network.T)
 		_, tPredecessorIsPresent = vertexToPredecessor[network.T]
 	}
@@ -98,7 +95,7 @@ func (algorithm edmondsKarpAlgorithm[V]) ComputeMaxFlow(
 	return currentFlow, nil
 }
 
-func assertPreconditions[V graph.Vertex](network *mfa.SimpleFlowNetwork[V]) {
+func assertPreconditions[V graph.Vertex](network *mf.SimpleFlowNetwork[V]) {
 	if network == nil {
 		panic("network == nil")
 	}
@@ -113,8 +110,8 @@ func assertPreconditions[V graph.Vertex](network *mfa.SimpleFlowNetwork[V]) {
 	}
 }
 
-func copyFlow[V graph.Vertex](flow mfa.Flow[V]) mfa.Flow[V] {
-	copiedFlow := make(mfa.Flow[V], len(flow))
+func copyFlow[V graph.Vertex](flow mf.Flow[V]) mf.Flow[V] {
+	copiedFlow := make(mf.Flow[V], len(flow))
 
 	for edge, edgeFlow := range flow {
 		copiedFlow[edge] = edgeFlow
@@ -125,11 +122,11 @@ func copyFlow[V graph.Vertex](flow mfa.Flow[V]) mfa.Flow[V] {
 
 // constructs residual network represented by pair (edges, capacity)
 func residualSimpleFlowNetwork[V graph.Vertex](
-	network *mfa.SimpleFlowNetwork[V],
-	currentFlow mfa.Flow[V],
-) (set.Set[graph.Edge[V]], mfa.Capacity[V]) {
-	edges := set.NewEmptyMapSet[graph.Edge[V]]()
-	capacity := make(mfa.Capacity[V])
+	network *mf.SimpleFlowNetwork[V],
+	currentFlow mf.Flow[V],
+) (set.Set[graph.Edge[V]], mf.Capacity[V]) {
+	edges := mapset.New[graph.Edge[V]]()
+	capacity := make(mf.Capacity[V])
 
 	// iterate over all permutations of vertices
 
@@ -175,12 +172,12 @@ func residualSimpleFlowNetwork[V graph.Vertex](
 }
 
 func breadthFirstSearch[V graph.Vertex](
-	digraph graph.SimpleDigraph[V],
+	digraph simpledigraph.SimpleDigraph[V],
 	s V,
 	t V,
 ) vertexToPredecessor[V] {
-	vertexQueue := queue.NewEmptySliceQueue[V]()
-	visitedVertices := set.NewEmptyMapSet[V]()
+	vertexQueue := slicequeue.New[V]()
+	visitedVertices := mapset.New[V]()
 	vertexToPredecessor := make(vertexToPredecessor[V])
 
 	vertexQueue.Push(s)
@@ -208,11 +205,11 @@ func breadthFirstSearch[V graph.Vertex](
 
 func computeDelta[V graph.Vertex](
 	t V,
-	vertexToItsPredecessor vertexToPredecessor[V],
-	residualNetworkCapacity mfa.Capacity[V],
+	vertexToPredecessor vertexToPredecessor[V],
+	residualNetworkCapacity mf.Capacity[V],
 ) uint32 {
 	v := t
-	u, uIsPresent := vertexToItsPredecessor[v]
+	u, uIsPresent := vertexToPredecessor[v]
 	var delta uint32 = math.MaxUint32
 
 	for uIsPresent {
@@ -224,7 +221,7 @@ func computeDelta[V graph.Vertex](
 		}
 
 		v = u
-		u, uIsPresent = vertexToItsPredecessor[v]
+		u, uIsPresent = vertexToPredecessor[v]
 	}
 
 	return delta

@@ -1,20 +1,22 @@
-package edmonds_karp_algorithm
+package edmondskarp
 
 import (
-	"github.com/stretchr/testify/assert"
-	"goraph/collection/set"
 	"goraph/graph"
-	ald "goraph/graph/adjacency_list_digraph"
-	mfa "goraph/max_flow_algorithm"
+	al "goraph/graph/digraph/simpledigraph/adjacencylist"
+	mf "goraph/maxflow"
 	"testing"
+
+	"github.com/nikolai-kramskoy/go-data-structures/set/mapset"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // I"ve used example from this website
 // https://en.wikipedia.org/wiki/Edmonds-Karp_algorithm#Example
-func newExampleSimpleFlowNetwork() (*mfa.SimpleFlowNetwork[string], mfa.Flow[string]) {
+func newExampleSimpleFlowNetwork() (*mf.SimpleFlowNetwork[string], mf.Flow[string]) {
 	a, b, c, d, e, f, g := "A", "B", "C", "D", "E", "F", "G"
 
-	vertices := set.NewMapSet(a, b, c, d, e, f, g)
+	vertices := mapset.NewFromElements(a, b, c, d, e, f, g)
 
 	ab, ad := graph.NewEdge(a, b), graph.NewEdge(a, d)
 	bc := graph.NewEdge(b, c)
@@ -23,7 +25,7 @@ func newExampleSimpleFlowNetwork() (*mfa.SimpleFlowNetwork[string], mfa.Flow[str
 	eb, eg := graph.NewEdge(e, b), graph.NewEdge(e, g)
 	fg := graph.NewEdge(f, g)
 
-	edges := set.NewMapSet(
+	edges := mapset.NewFromElements(
 		ab, ad,
 		bc,
 		ca, cd, ce,
@@ -32,9 +34,9 @@ func newExampleSimpleFlowNetwork() (*mfa.SimpleFlowNetwork[string], mfa.Flow[str
 		fg,
 	)
 
-	simpleDigraph, _ := ald.NewAdjacencyListSimpleDigraph(vertices, edges)
+	simpleDigraph, _ := al.NewAdjacencyListSimpleDigraph(vertices, edges)
 
-	capacity := mfa.Capacity[string]{
+	capacity := mf.Capacity[string]{
 		ab: 3, ad: 3,
 		bc: 4,
 		ca: 3, cd: 1, ce: 2,
@@ -43,7 +45,7 @@ func newExampleSimpleFlowNetwork() (*mfa.SimpleFlowNetwork[string], mfa.Flow[str
 		fg: 9,
 	}
 
-	flow := mfa.Flow[string]{
+	flow := mf.Flow[string]{
 		ab: 0, ad: 0,
 		bc: 0,
 		ca: 0, cd: 0, ce: 0,
@@ -52,7 +54,7 @@ func newExampleSimpleFlowNetwork() (*mfa.SimpleFlowNetwork[string], mfa.Flow[str
 		fg: 0,
 	}
 
-	expectedMaxFlow := mfa.Flow[string]{
+	expectedMaxFlow := mf.Flow[string]{
 		ab: 2, ad: 3,
 		bc: 2,
 		ca: 0, cd: 1, ce: 1,
@@ -61,7 +63,7 @@ func newExampleSimpleFlowNetwork() (*mfa.SimpleFlowNetwork[string], mfa.Flow[str
 		fg: 4,
 	}
 
-	return &mfa.SimpleFlowNetwork[string]{
+	return &mf.SimpleFlowNetwork[string]{
 			SimpleDigraph: simpleDigraph,
 			S:             a,
 			T:             g,
@@ -71,15 +73,15 @@ func newExampleSimpleFlowNetwork() (*mfa.SimpleFlowNetwork[string], mfa.Flow[str
 		expectedMaxFlow
 }
 
-func TestEdmondsKarpAlgorithm_Compute(t *testing.T) {
-	simpleFlowNetwork, expectedMaxFlow := newExampleSimpleFlowNetwork()
+func TestEdmondsKarp_Compute(t *testing.T) {
+	network, expectedMaxFlow := newExampleSimpleFlowNetwork()
 
-	maxFlowAlgorithm := NewEdmondsKarpAlgorithm[string]()
+	edmondsKarp := NewEdmondsKarp[string]()
 
-	maxFlow, err := maxFlowAlgorithm.ComputeMaxFlow(simpleFlowNetwork)
+	actualMaxFlow, err := edmondsKarp.Compute(network)
 
-	assert.NotNil(t, maxFlow)
+	assert.NotNil(t, actualMaxFlow)
 	assert.Nil(t, err)
 
-	assert.Equal(t, expectedMaxFlow, maxFlow)
+	assert.Equal(t, expectedMaxFlow, actualMaxFlow)
 }

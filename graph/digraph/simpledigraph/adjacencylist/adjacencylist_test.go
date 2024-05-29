@@ -1,14 +1,16 @@
-package adjacency_list_digraph
+package adjacencylist
 
 import (
-	"github.com/stretchr/testify/assert"
-	"goraph/collection/set"
 	"goraph/graph"
 	"testing"
+
+	"github.com/nikolai-kramskoy/go-data-structures/set/mapset"
+
+	"github.com/stretchr/testify/assert"
 )
 
-var vertices = set.NewMapSet(1, 2, 3, 4)
-var edges = set.NewMapSet(
+var vertices = mapset.NewFromElements(1, 2, 3, 4)
+var edges = mapset.NewFromElements(
 	graph.NewEdge(1, 2),
 	graph.NewEdge(1, 4),
 	graph.NewEdge(2, 1),
@@ -17,7 +19,7 @@ var edges = set.NewMapSet(
 	graph.NewEdge(3, 4),
 )
 
-func TestAdjacencyListDigraph(t *testing.T) {
+func TestAdjacencyListSimpleDigraph(t *testing.T) {
 	simpleDigraph, err := NewAdjacencyListSimpleDigraph(vertices, edges)
 	assert.NotNil(t, simpleDigraph)
 	assert.Nil(t, err)
@@ -40,42 +42,42 @@ func TestAdjacencyListDigraph(t *testing.T) {
 	assert.Nil(t, oneOneEdge)
 }
 
-func TestAdjacencyListDigraph_Successors(t *testing.T) {
+func TestAdjacencyListSimpleDigraph_Successors(t *testing.T) {
 	simpleDigraph, err := NewAdjacencyListSimpleDigraph(vertices, edges)
 	assert.NotNil(t, simpleDigraph)
 	assert.Nil(t, err)
 
 	twoSuccessors := simpleDigraph.Successors(2)
 
-	assert.Equal(t, set.NewMapSet(1, 3, 4), twoSuccessors)
+	assert.Equal(t, mapset.NewFromElements(1, 3, 4), twoSuccessors)
 }
 
-func TestAdjacencyListDigraph_Successors2(t *testing.T) {
+func TestAdjacencyListSimpleDigraph_Successors2(t *testing.T) {
 	simpleDigraph, err := NewAdjacencyListSimpleDigraph(vertices, edges)
 	assert.NotNil(t, simpleDigraph)
 	assert.Nil(t, err)
 
 	twoSuccessors := simpleDigraph.Successors(-2)
 
-	assert.Equal(t, set.NewEmptyMapSet[int](), twoSuccessors)
+	assert.Equal(t, mapset.New[int](), twoSuccessors)
 }
 
-func TestAdjacencyListDigraph_Predecessors(t *testing.T) {
+func TestAdjacencyListSimpleDigraph_Predecessors(t *testing.T) {
 	simpleDigraph, err := NewAdjacencyListSimpleDigraph(vertices, edges)
 	assert.NotNil(t, simpleDigraph)
 	assert.Nil(t, err)
 
 	twoPredecessors := simpleDigraph.Predecessors(2)
 
-	assert.Equal(t, set.NewMapSet(1), twoPredecessors)
+	assert.Equal(t, mapset.NewFromElements(1), twoPredecessors)
 }
 
-func TestAdjacencyListDigraph_Predecessor2(t *testing.T) {
+func TestAdjacencyListSimpleDigraph_Predecessor2(t *testing.T) {
 	simpleDigraph, err := NewAdjacencyListSimpleDigraph(vertices, edges)
 	assert.NotNil(t, simpleDigraph)
 	assert.Nil(t, err)
 
 	twoPredecessors := simpleDigraph.Predecessors(-6)
 
-	assert.Equal(t, set.NewEmptyMapSet[int](), twoPredecessors)
+	assert.Equal(t, mapset.New[int](), twoPredecessors)
 }
