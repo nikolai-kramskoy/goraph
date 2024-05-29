@@ -2,8 +2,12 @@
 
 This library provides various graph ADTs, its implementations and algorithms.
 
-## Directed graph
+## ADTs and data structures
 
-There is an adjacency list implementation of directed graph ADT.
+- Simple digraph:
+    - adjacency list
 
-## Max flow
+## Algorithms
+
+- Max flow problem:
+    - Edmonds-Karp algorithm

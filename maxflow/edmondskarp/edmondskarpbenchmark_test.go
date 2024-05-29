@@ -6,26 +6,55 @@ import (
 	al "goraph/graph/digraph/simpledigraph/adjacencylist"
 	mf "goraph/maxflow"
 	"math/rand"
-	"os"
-	"strconv"
 	"testing"
 
 	"github.com/nikolai-kramskoy/go-data-structures/set"
 	"github.com/nikolai-kramskoy/go-data-structures/set/mapset"
 )
 
-func BenchmarkEdmondsKarp_Compute(b *testing.B) {
-	amountOfVertices, amountOfEdges, graphIsComplete := getParameters()
+func BenchmarkEdmondsKarp_Compute_1(b *testing.B) {
+	amountOfVertices := 10
+	amountOfEdges := 50
 
 	fmt.Printf(
-		"amountOfVertices = %d, amountOfEdges = %d, graphIsComplete = %t\n",
+		"amountOfVertices = %d, amountOfEdges = %d, graphIsComplete = %t ",
 		amountOfVertices,
 		amountOfEdges,
-		graphIsComplete,
+		false,
 	)
 
-	network := generateRandomSimpleFlowNetwork(amountOfVertices, amountOfEdges, graphIsComplete)
+	edmondsKarp_Compute_Benchmark(b, generateSimpleFlowNetwork(amountOfVertices, amountOfEdges))
+}
 
+func BenchmarkEdmondsKarp_Compute_2(b *testing.B) {
+	amountOfVertices := 100
+	amountOfEdges := 5000
+
+	fmt.Printf(
+		"amountOfVertices = %d, amountOfEdges = %d, graphIsComplete = %t ",
+		amountOfVertices,
+		amountOfEdges,
+		false,
+	)
+
+	edmondsKarp_Compute_Benchmark(b, generateSimpleFlowNetwork(amountOfVertices, amountOfEdges))
+}
+
+func BenchmarkEdmondsKarp_Compute_3(b *testing.B) {
+	amountOfVertices := 1000
+	amountOfEdges := amountOfVertices * amountOfVertices
+
+	fmt.Printf(
+		"amountOfVertices = %d, amountOfEdges = %d, graphIsComplete = %t ",
+		amountOfVertices,
+		amountOfEdges,
+		true,
+	)
+
+	edmondsKarp_Compute_Benchmark(b, generateSimpleFlowNetwork(amountOfVertices, amountOfEdges))
+}
+
+func edmondsKarp_Compute_Benchmark(b *testing.B, network *mf.SimpleFlowNetwork[int]) {
 	edmondsKarp := NewEdmondsKarp[int]()
 
 	b.ResetTimer()
@@ -62,47 +91,32 @@ func computeMaxFlowValue(network *mf.SimpleFlowNetwork[int], maxFlow mf.Flow[int
 	return maxFlowValue
 }
 
-func getParameters() (int, int, bool) {
-	argsLastIndex := len(os.Args) - 1
+// Vertices are labeled from 1 to amountOfVertices.
+func generateSimpleFlowNetwork(
+	amountOfVertices int,
+	amountOfEdges int,
+) *mf.SimpleFlowNetwork[int] {
+	edges, capacity, flow := newEdgesCapacityFlow(amountOfVertices, amountOfEdges)
 
-	amountOfVertices, err1 := strconv.Atoi(os.Args[argsLastIndex-2])
-
-	if err1 != nil {
-		panic(err1)
-	}
-
-	amountOfEdges, err2 := strconv.Atoi(os.Args[argsLastIndex-1])
-
-	if err2 != nil {
-		panic(err2)
-	}
-
-	graphIsComplete, err3 := strconv.ParseBool(os.Args[argsLastIndex])
-
-	if err3 != nil {
-		panic(err3)
-	}
-
-	return amountOfVertices, amountOfEdges, graphIsComplete
+	return generateSimpleFlowNetworkHelper(amountOfVertices, edges, capacity, flow)
 }
 
 // Vertices are labeled from 1 to amountOfVertices.
-func generateRandomSimpleFlowNetwork(
+func generateCompleteSimpleFlowNetwork(
 	amountOfVertices int,
-	amountOfEdges int,
-	graphIsComplete bool,
+) *mf.SimpleFlowNetwork[int] {
+	edges, capacity, flow := newEdgesCapacityFlowCompleteGraph(amountOfVertices)
+
+	return generateSimpleFlowNetworkHelper(amountOfVertices, edges, capacity, flow)
+}
+
+func generateSimpleFlowNetworkHelper(
+	amountOfVertices int,
+	edges set.Set[graph.Edge[int]],
+	capacity mf.Capacity[int],
+	flow mf.Flow[int],
 ) *mf.SimpleFlowNetwork[int] {
 	vertices := newVertices(amountOfVertices)
-
-	var edges set.Set[graph.Edge[int]]
-	var capacity mf.Capacity[int]
-	var flow mf.Flow[int]
-
-	if graphIsComplete {
-		edges, capacity, flow = newEdgesCapacityFlowCompleteGraph(amountOfVertices)
-	} else {
-		edges, capacity, flow = newEdgesCapacityFlow(amountOfVertices, amountOfEdges)
-	}
 
 	simpleDigraph, err := al.NewAdjacencyListSimpleDigraph(vertices, edges)
 
