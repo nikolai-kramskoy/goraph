@@ -1,0 +1,44 @@
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# VScode
+.vscode/
+debug
+__debug_bin
+
+# IDE
+.idea
+.idea/
+.run
+.emacs.go.project.el
+
+# Packr
+#*-packr.go
+
+# Env
+.env
+
+#Database volume
+db/
+
+# Project binaries
+cmd/*/debug
+cmd/*/main
+bin
+
+# sql-migrate config file
+dbconfig.yml
+
+# vendor
+vendor/
+
+# Mac OS
+.DS_Store
+
+# other
+data/
+/probs/
+/venv/
+
+# Go files after sed
+*.go-e
