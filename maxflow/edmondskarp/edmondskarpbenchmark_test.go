@@ -41,7 +41,7 @@ func BenchmarkEdmondsKarp_Compute_2(b *testing.B) {
 }
 
 func BenchmarkEdmondsKarp_Compute_3(b *testing.B) {
-	amountOfVertices := 1000
+	amountOfVertices := 250
 	amountOfEdges := amountOfVertices * amountOfVertices
 
 	fmt.Printf(
@@ -51,7 +51,7 @@ func BenchmarkEdmondsKarp_Compute_3(b *testing.B) {
 		true,
 	)
 
-	edmondsKarp_Compute_Benchmark(b, generateSimpleFlowNetwork(amountOfVertices, amountOfEdges))
+	edmondsKarp_Compute_Benchmark(b, generateCompleteSimpleFlowNetwork(amountOfVertices))
 }
 
 func edmondsKarp_Compute_Benchmark(b *testing.B, network *mf.SimpleFlowNetwork[int]) {
